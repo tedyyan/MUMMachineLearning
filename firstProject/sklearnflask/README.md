@@ -1,7 +1,7 @@
 # Flask API for scikit learn
-A simple Flask application that can serve predictions from a scikit-learn model. Reads a pickled sklearn model into memory when the Flask app is started and returns predictions through the /predict endpoint. You can also use the /train endpoint to train/retrain the model. Any sklearn model can be used for prediction.
+A simple Flask application 
 
-Read more in [this blog post](https://medium.com/@amirziai/a-flask-api-for-serving-scikit-learn-models-c8bcdaa41daa).
+Refer to [this blog post](https://medium.com/@amirziai/a-flask-api-for-serving-scikit-learn-models-c8bcdaa41daa).
 
 ### Dependencies
 - scikit-learn
@@ -23,16 +23,14 @@ python main.py <port>
 Returns an array of predictions given a JSON object representing independent variables. Here's a sample input:
 ```
 [
-    {"Age": 85, "Sex": "male", "Embarked": "S"},
-    {"Age": 24, "Sex": "female", "Embarked": "C"},
-    {"Age": 3, "Sex": "male", "Embarked": "C"},
-    {"Age": 21, "Sex": "male", "Embarked": "S"}
+    {"Pregnancies":"6", "Glucose":"148", "BloodPressure":"72", "SkinThickness":"35", "Insulin":"0", "BMI":"33.0", "DiabetesPedigreeFunction":"0.627", "Age":"50"},
+    {"Pregnancies":"1", "Glucose":"10", "BloodPressure":"36", "SkinThickness":"29", "Insulin":"0", "BMI":"10.6", "DiabetesPedigreeFunction":"0.051", "Age":"21"}
 ]
 ```
 
 and sample output:
 ```
-{"prediction": [0, 1, 1, 0]}
+{"prediction": [0, 1]}
 ```
 
 
