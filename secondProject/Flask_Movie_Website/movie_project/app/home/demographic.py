@@ -32,7 +32,7 @@ def getDGRecommends():
     q_movies[['id','title', 'vote_count', 'vote_average', 'score']].head(10)
 
     #pop= df2.sort_values('popularity', ascending=False)
-    return q_movies[['id','title', 'vote_count', 'vote_average', 'score']].head(10)
+    return q_movies[['title']].head(10)
     
     '''
     plt.figure(figsize=(12,4))

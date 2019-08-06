@@ -13,7 +13,8 @@ from werkzeug.security import generate_password_hash
 from functools import wraps  # 装饰器(用于访问控制)
 from werkzeug.utils import secure_filename
 from app.home.demographic import getDGRecommends
-from app.home.ContentBasedFilteringRecommandation import get_recommendations 
+from app.home.ContentBasedFilteringRecommandation import get_recommendations
+from app.home.SVD_NMF_API import predict_VSD 
 import os, stat, datetime
 
 # 修改上传的文件名称
@@ -341,30 +342,31 @@ def moviecol_add():
 def animation():
     data = Preview.query.all()
     items = []
-    #session['clicked_id'] = 157336 #'Interstellar'
+    #session['clicked_id'] = 'Interstellar'
     if 'user_id' not in session and 'clicked_id' not in session:
         items = getDGRecommends()
         
     elif 'user_id' not in session and 'clicked_id' in session:
-        #items = get_recommendations(session['clicked_id'])
-        items = getDGRecommends()
+        items = get_recommendations(session['clicked_id'])
+        print(items.head(6))
+        #items = getDGRecommends()
     else:
-        items = getDGRecommends()
+        items = predict_VSD(session['user_id'])
 
     movies = []
-    movieid = []
+    #movieid = []
     items = items.values
     for it in items:
-        movies.append(it[1])
-    for it in items:
-        movieid.append(it[0])
+        movies.append(it)
+    #for it in items:
+    #    movieid.append(it[0])
 
     i = 0
     for d in data:
         print(d.title)
         #d.id = movieid[i]
         d.title = movies[i]
-        d.realid = movieid[i]
+        #d.realid = movieid[i]
         db.session.add(d)
         i += 1
     db.session.commit()
@@ -403,9 +405,12 @@ def search(page=None):
 @home.route('/play/<int:id>/<int:page>/',methods=['GET','POST'])
 def play(id=None,page=None):
     form = CommentForm()
-    movie = Movie.query.get_or_404(id)
+    movie = Movie.query.get_or_404(1)
     movie.playnum = movie.playnum + 1 #点开一次,播放数+1
     tag = Tag.query.filter_by(id=movie.tag_id).first()
+    preview = Preview.query.get(id)
+    print(preview)
+    session['clicked_id'] = preview.title
     #获取评论列表
     if page == None:
         page = 1
