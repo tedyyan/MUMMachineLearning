@@ -45,7 +45,7 @@ def predict_VSD(userid):
     model.fit(trainset)
 
     predictions = model.test(testset)
-    top_n = get_top_n(predictions, n=5)
+    top_n = get_top_n(predictions, n=30)
 
     movie_titles = pd.read_csv('movies_metadata.csv', usecols=['id', 'title'])
     movie_titles = movie_titles.rename(columns={'id': 'movieId'})
@@ -66,7 +66,7 @@ def predict_VSD(userid):
 
 def predict_NMF(userid):
     df = pd.read_csv('ratings_small.csv').drop(['timestamp'],axis=1)
-    reader = Reader(rating_scale=(1, 5))
+    reader = Reader(rating_scale=(1, 30))
 
     #使用reader格式从文件中读取数据
     data = Dataset.load_from_df(df[['userId', 'movieId', 'rating']], reader=reader)
