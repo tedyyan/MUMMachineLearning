@@ -1,0 +1,454 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>userId</th>\n",
+       "      <th>movieId</th>\n",
+       "      <th>rating</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>count</th>\n",
+       "      <td>100004.000000</td>\n",
+       "      <td>100004.000000</td>\n",
+       "      <td>100004.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>mean</th>\n",
+       "      <td>347.011310</td>\n",
+       "      <td>12548.664363</td>\n",
+       "      <td>3.543608</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>std</th>\n",
+       "      <td>195.163838</td>\n",
+       "      <td>26369.198969</td>\n",
+       "      <td>1.058064</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>min</th>\n",
+       "      <td>1.000000</td>\n",
+       "      <td>1.000000</td>\n",
+       "      <td>0.500000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>25%</th>\n",
+       "      <td>182.000000</td>\n",
+       "      <td>1028.000000</td>\n",
+       "      <td>3.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>50%</th>\n",
+       "      <td>367.000000</td>\n",
+       "      <td>2406.500000</td>\n",
+       "      <td>4.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>75%</th>\n",
+       "      <td>520.000000</td>\n",
+       "      <td>5418.000000</td>\n",
+       "      <td>4.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>max</th>\n",
+       "      <td>671.000000</td>\n",
+       "      <td>163949.000000</td>\n",
+       "      <td>5.000000</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "              userId        movieId         rating\n",
+       "count  100004.000000  100004.000000  100004.000000\n",
+       "mean      347.011310   12548.664363       3.543608\n",
+       "std       195.163838   26369.198969       1.058064\n",
+       "min         1.000000       1.000000       0.500000\n",
+       "25%       182.000000    1028.000000       3.000000\n",
+       "50%       367.000000    2406.500000       4.000000\n",
+       "75%       520.000000    5418.000000       4.000000\n",
+       "max       671.000000  163949.000000       5.000000"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import pandas as pd\n",
+    "from surprise import SVD\n",
+    "from surprise import Dataset, Reader\n",
+    "from surprise.model_selection import cross_validate, train_test_split\n",
+    "from collections import defaultdict\n",
+    "from surprise import NMF\n",
+    "from surprise.model_selection import GridSearchCV\n",
+    "\n",
+    "df = pd.read_csv('ratings_small.csv').drop(['timestamp'],axis=1)\n",
+    "df.describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#df = pd.read_csv('ratings_small.csv').drop(['timestamp'],axis=1)\n",
+    "reader = Reader(rating_scale=(1, 5))\n",
+    "\n",
+    "#使用reader格式从文件中读取数据\n",
+    "data = Dataset.load_from_df(df[['userId', 'movieId', 'rating']], reader=reader)\n",
+    "\n",
+    "#拆分训练集与测试集，75%的样本作为训练集，25%的样本作为测试集\n",
+    "trainset, testset = train_test_split(data, test_size=.25)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "trainset的类型是surprise.dataset.Trainset类型，我们可以查看数据的基本信息"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "671"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "trainset.n_users "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "8214"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "trainset.n_items "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "训练模型，指定有100个隐含特征，使用训练集进行训练"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<surprise.prediction_algorithms.matrix_factorization.SVD at 0x118c7bd90>"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "model = SVD(n_factors=100)\n",
+    "model.fit(trainset)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "100个隐含特征是指，原本671*8263的矩阵会被拆分成671*100和100*8263的两个矩阵乘积，n_factors值可以任意指定只要不超过8263即可，但是设置不同的值将会拟合出不同的模型，需要选择使结果较优的值。\n",
+    "查看拆分出来的两个矩阵"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(671, 100)"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "model.pu.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(8214, 100)"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "model.qi.shape "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "0.9041107360095156\n",
+      "{'lr_all': 0.005, 'n_factors': 100, 'n_epochs': 10}\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "<surprise.prediction_algorithms.matrix_factorization.SVD at 0x118c7b110>"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#GridSearchCV调参\n",
+    "#指定参数选择范围\n",
+    "param_grid = {'n_epochs': [5, 10], 'lr_all': [0.002, 0.005],'n_factors' : [100, 1000]}\n",
+    "\n",
+    "#'reg_all': [0.4, 0.6]\n",
+    "\n",
+    "gs = GridSearchCV(SVD, param_grid, measures=['rmse', 'mae'], cv=4)\n",
+    "gs.fit(data)\n",
+    "\n",
+    "# 打印最好的均方根误差RMSE\n",
+    "print(gs.best_score['rmse'])\n",
+    "\n",
+    "# 打印取得最好RMSE的参数集合\n",
+    "print(gs.best_params['rmse'])\n",
+    "\n",
+    "# 现在可以使用产生最佳RMSE的算法\n",
+    "algo = gs.best_estimator['rmse']\n",
+    "algo.fit(data.build_full_trainset())\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "0.9281112539053873\n",
+      "{'n_factors': 50, 'reg_pu': 0.1, 'n_epochs': 100}\n"
+     ]
+    },
+    {
+     "ename": "AttributeError",
+     "evalue": "Trainset instance has no attribute 'raw_ratings'",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[0;31mAttributeError\u001b[0m                            Traceback (most recent call last)",
+      "\u001b[0;32m<ipython-input-15-3fd7cdfff613>\u001b[0m in \u001b[0;36m<module>\u001b[0;34m()\u001b[0m\n\u001b[1;32m     16\u001b[0m \u001b[0;31m# 现在可以使用产生最佳RMSE的算法\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     17\u001b[0m \u001b[0malgo_nmf\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mgs_nmf\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mbest_estimator\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m'rmse'\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 18\u001b[0;31m \u001b[0mgs_nmf\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfit\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mdata\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mbuild_full_trainset\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+      "\u001b[0;32m/anaconda2/lib/python2.7/site-packages/surprise/model_selection/search.pyc\u001b[0m in \u001b[0;36mfit\u001b[0;34m(self, data)\u001b[0m\n\u001b[1;32m     84\u001b[0m                                    self.return_train_measures)\n\u001b[1;32m     85\u001b[0m             for params, (trainset, testset) in product(self.param_combinations,\n\u001b[0;32m---> 86\u001b[0;31m                                                        cv.split(data))\n\u001b[0m\u001b[1;32m     87\u001b[0m         )\n\u001b[1;32m     88\u001b[0m         out = Parallel(n_jobs=self.n_jobs,\n",
+      "\u001b[0;32m/anaconda2/lib/python2.7/site-packages/surprise/model_selection/split.pyc\u001b[0m in \u001b[0;36msplit\u001b[0;34m(self, data)\u001b[0m\n\u001b[1;32m     93\u001b[0m         '''\n\u001b[1;32m     94\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 95\u001b[0;31m         \u001b[0;32mif\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mn_splits\u001b[0m \u001b[0;34m>\u001b[0m \u001b[0mlen\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mdata\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mraw_ratings\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;32mor\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mn_splits\u001b[0m \u001b[0;34m<\u001b[0m \u001b[0;36m2\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     96\u001b[0m             raise ValueError('Incorrect value for n_splits={0}. '\n\u001b[1;32m     97\u001b[0m                              \u001b[0;34m'Must be >=2 and less than the number '\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;31mAttributeError\u001b[0m: Trainset instance has no attribute 'raw_ratings'"
+     ]
+    }
+   ],
+   "source": [
+    "#GridSearchCV调参\n",
+    "#指定参数选择范围\n",
+    "param_grid_nmf = {'n_epochs': [50, 100], 'reg_pu': [0.01, 0.10],'n_factors' : [10, 50]}\n",
+    "\n",
+    "#'reg_all': [0.4, 0.6]\n",
+    "\n",
+    "gs_nmf = GridSearchCV(NMF, param_grid_nmf, measures=['rmse', 'mae'], cv=4)\n",
+    "gs_nmf.fit(data)\n",
+    "\n",
+    "# 打印最好的均方根误差RMSE\n",
+    "print(gs_nmf.best_score['rmse'])\n",
+    "\n",
+    "# 打印取得最好RMSE的参数集合\n",
+    "print(gs_nmf.best_params['rmse'])\n",
+    "\n",
+    "# 现在可以使用产生最佳RMSE的算法\n",
+    "algo_nmf = gs_nmf.best_estimator['rmse']\n",
+    "gs_nmf.fit(data.build_full_trainset())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "predictions的数据结构，是surprise中的算法自带接口model.test()的输出值。"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "predictions = algo.test(testset)\n",
+    "predictions"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "定义get_top_n()函数，它能根据predictions结果进行解析，获取top_n字典，该字典的key是user-id，value是该user打分（预测值）最高的n个item-id"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def get_top_n(predictions, n=10):\n",
+    "    # First map the predictions to each user.\n",
+    "    top_n = defaultdict(list)\n",
+    "    for uid, iid, true_r, est, _ in predictions:\n",
+    "        top_n[uid].append((iid, est))\n",
+    "\n",
+    "    # Then sort the predictions for each user and retrieve the k highest ones.\n",
+    "    for uid, user_ratings in top_n.items():\n",
+    "        user_ratings.sort(key=lambda x: x[1], reverse=True)\n",
+    "        top_n[uid] = user_ratings[:n]\n",
+    "\n",
+    "    return top_n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "使用get_top_n()函数，获取测试集中所有用户得分最高的n（等于2）个item-id，并将print出来，得到结果如下"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "top_n = get_top_n(predictions, n=5)\n",
+    "for uid, user_ratings in top_n.items():\n",
+    "    print(uid, [iid for (iid, _) in user_ratings])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#使用NMF\n",
+    "algo_nmf.fit(trainset)\n",
+    "pred_nmf = algo.test(testset)\n",
+    "top_nmf_n = get_top_n(pred_nmf, n=5)\n",
+    "for uid, user_ratings in top_nmf_n.items():\n",
+    "    print(uid, [iid for (iid, _) in user_ratings])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 2",
+   "language": "python",
+   "name": "python2"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 2
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython2",
+   "version": "2.7.16"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
