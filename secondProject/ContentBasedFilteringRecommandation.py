@@ -117,7 +117,7 @@ def get_recommendations(title, cosine_sim=cosine_sim):
 # In[12]:
 
 
-print get_recommendations('Interstellar')
+#print get_recommendations('Interstellar')
 
 
 
