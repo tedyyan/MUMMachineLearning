@@ -13,7 +13,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from sklearn import model_selection
 from twython import Twython
-from LSTM import predict
+from LSTM import predictLSTM
 import json
 
 from geopy.geocoders import Nominatim
@@ -95,7 +95,8 @@ def drawMapNeg(tweets):
 
 def analysisSentiment(text):
     print(text)
-    if len(text) > 80:
+    
+    if predictLSTM(text) == 'Positive':  #len(text) > 80:
         return "positive"
     else:
         return "negative"

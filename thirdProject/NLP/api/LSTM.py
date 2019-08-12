@@ -54,12 +54,13 @@ model.add(SpatialDropout1D(0.4))
 model.add(LSTM(lstm_out, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(2,activation='softmax'))
 #model.add(TimeDistributed(Dense(2,activation='softmax')))
+
 model.compile(loss = 'categorical_crossentropy', optimizer='adam',metrics = ['accuracy'])
 print(model.summary())
 
 # ## train mode
 
-batch_size = 64
+batch_size = 32
 model.fit(X_train, Y_train, epochs = 10, batch_size=batch_size, verbose = 2)
 
 validation_size = 1000
@@ -72,7 +73,7 @@ Y_test = Y_test[:-validation_size]
 score,acc = model.evaluate(X_test, Y_test, verbose = 2, batch_size = batch_size)
 print("score: %.2f" % (score))
 print("acc: %.2f" % (acc))
-
+''''''
 # ## perdict
 def get_result(sentiment):
     if(np.argmax(sentiment) == 0):
@@ -86,7 +87,7 @@ def get_result(sentiment):
     #     return 'Negative'
 
 
-def predict(text):
+def predictLSTM(text):
     twt = [text]
     #vectorizing the tweet by the pre-fitted tokenizer instance
     twt = tokenizer.texts_to_sequences(twt)
