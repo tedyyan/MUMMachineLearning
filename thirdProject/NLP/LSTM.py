@@ -19,6 +19,7 @@ import re
 from keras.models import load_model
 
 model = Sequential()
+max_fatures = 2000
 
 def load_data():
     data = pd.read_csv('./Sentiment.csv')
@@ -34,7 +35,7 @@ def load_data():
     for idx,row in data.iterrows():
         row[0] = row[0].replace('rt',' ')
         
-    max_fatures = 2000
+    
     tokenizer = Tokenizer(num_words=max_fatures, split=' ')
     tokenizer.fit_on_texts(data['text'].values)
     X = tokenizer.texts_to_sequences(data['text'].values)
@@ -96,12 +97,10 @@ def trian():
 
 # ## perdict
 def get_result(y_pred):
-    if y_pred[0] > 0.5: 
+    if y_pred[0] >= 0.5: 
         return 'Positive'
-    elif y_pred[1] > 0.5:
-        return 'Negative'
     else :
-        return 'Neutral'
+        return 'Negative'
 
 
 def predict(text):
@@ -116,27 +115,27 @@ def predict(text):
     PX = tokenizer.texts_to_sequences(predict_data)
     PX = pad_sequences(PX, maxlen=28)
     
-    model=load_model('model.h5')
+    
     if model == None:
-        return print("load failed!!!")
+        print("load_model!!!")
     # print(model.summary())
 
     y_pred = model.predict(PX, batch_size = 1)
-
+    print(y_pred)
     result = get_result(y_pred[0])
     return result
 
 
 def test():
-    perdict_text = "arcorubio came out of the gate like a true leader. I look forward to hearing more about his plans for a better America."
+    perdict_text = "I'll tell you the one good thing about #GOPDebates: candidates are tripping over themselves to outdo each other in sexism"
     print(predict(perdict_text))
 
-    perdict_text2 = "People who say they are #prolife are usually anti-social programs... They know that a society is a group of people right?"
+    perdict_text2 = "bad"
     print(predict(perdict_text2))
 
 if __name__ == '__main__':
 
-    # trian()
+    trian()
     # load()
     test()
 
