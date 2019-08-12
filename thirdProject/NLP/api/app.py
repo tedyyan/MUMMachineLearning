@@ -19,7 +19,6 @@ import json
 from geopy.geocoders import Nominatim
 import gmplot
 
-
 app = Flask(__name__)
 def drawMapPos(tweets):
     geolocator = Nominatim()
@@ -118,8 +117,8 @@ def analysistext():
     gets = request.args.to_dict()
     yourtext = gets.get("yourtext")
     
-    print("yourtext",yourtext)
-    return jsonify({"yourtext":yourtext})
+    result = analysisSentiment(yourtext)
+    return jsonify({"sentiment":result})
 
 @app.route('/tweetLearning', methods=['GET'])
 def tweetLearning():

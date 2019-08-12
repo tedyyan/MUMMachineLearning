@@ -60,7 +60,7 @@ print(model.summary())
 
 # ## train mode
 
-batch_size = 32
+batch_size = 256
 model.fit(X_train, Y_train, epochs = 10, batch_size=batch_size, verbose = 2)
 
 validation_size = 1000
