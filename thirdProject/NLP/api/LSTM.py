@@ -18,11 +18,10 @@ from keras.utils.np_utils import to_categorical
 import re
 from keras.models import load_model
 
-model = Sequential()
 max_fatures = 2000
 
 def load_data():
-    data = pd.read_csv('./Sentiment.csv')
+    data = pd.read_csv('../Sentiment.csv')
     # Keeping only the neccessary columns
     data = data[['text','sentiment']]
     data = data[data.sentiment != "Neutral"]
@@ -47,53 +46,41 @@ def load_data():
     print(X_test.shape,Y_test.shape)
     return X_train, X_test, Y_train, Y_test, X, Y
 
-def trian():
-    
-    # load_data
-    X_train, X_test, Y_train, Y_test, X, Y = load_data()
+#=======init================================================
 
-    # ## build model
-    embed_dim = 128
-    lstm_out = 196
+# load_data
+X_train, X_test, Y_train, Y_test, X, Y = load_data()
 
-    # model = Sequential()
-    model.add(Embedding(max_fatures, embed_dim, input_length = X.shape[1]))
-    model.add(SpatialDropout1D(0.4))
-    #model.add(LSTM(lstm_out, dropout=0.2, recurrent_dropout=0.2, return_sequences=True))
-    model.add(LSTM(lstm_out, dropout=0.2, recurrent_dropout=0.2))
-    model.add(Dense(2,activation='softmax'))
-    #model.add(TimeDistributed(Dense(2,activation='softmax')))
-    model.compile(loss = 'categorical_crossentropy', optimizer='adam',metrics = ['accuracy'])
-    print(model.summary())
+# ## build model
+embed_dim = 128
+lstm_out = 196
 
 
-    # ## train mode
+model = Sequential()
+model.add(Embedding(max_fatures, embed_dim, input_length = X.shape[1]))
+model.add(SpatialDropout1D(0.4))
+#model.add(LSTM(lstm_out, dropout=0.2, recurrent_dropout=0.2, return_sequences=True))
+model.add(LSTM(lstm_out, dropout=0.2, recurrent_dropout=0.2))
+model.add(Dense(2,activation='softmax'))
+#model.add(TimeDistributed(Dense(2,activation='softmax')))
+model.compile(loss = 'categorical_crossentropy', optimizer='adam',metrics = ['accuracy'])
+print(model.summary())
 
-    batch_size = 64
-    model.fit(X_train, Y_train, epochs = 7, batch_size=batch_size, verbose = 2)
+# ## train mode
 
+batch_size = 64
+model.fit(X_train, Y_train, epochs = 10, batch_size=batch_size, verbose = 2)
 
-    # ## model evaluate
-    validation_size = 1000
+validation_size = 1000
 
-    X_validate = X_test[-validation_size:]
-    Y_validate = Y_test[-validation_size:]
-    X_test = X_test[:-validation_size]
-    Y_test = Y_test[:-validation_size]
+X_validate = X_test[-validation_size:]
+Y_validate = Y_test[-validation_size:]
+X_test = X_test[:-validation_size]
+Y_test = Y_test[:-validation_size]
 
-
-    score,acc = model.evaluate(X_test, Y_test, verbose = 2, batch_size = batch_size)
-    print("score: %.2f" % (score))
-    print("acc: %.2f" % (acc))
-
-    # ## save model
-    # model_json=model.to_json()
-    # with open('model.json','w') as f:
-    #     f.write(model_json)
-    # model.save_weights('model.h5')
-    
-    model.save('model.h5')
-
+score,acc = model.evaluate(X_test, Y_test, verbose = 2, batch_size = batch_size)
+print("score: %.2f" % (score))
+print("acc: %.2f" % (acc))
 
 # ## perdict
 def get_result(y_pred):
@@ -130,12 +117,13 @@ def test():
     perdict_text = "I'll tell you the one good thing about #GOPDebates: candidates are tripping over themselves to outdo each other in sexism"
     print(predict(perdict_text))
 
-    perdict_text2 = "bad"
+    perdict_text2 = "Really enjoyed everything @marcorubio had to say last night. #Rubio2016 #GOPDebate #AmericaOnPoint "
+    print(predict(perdict_text2))
+
+    perdict_text2 = "No *I* hate Planned Parenthood and women more! NO I HATE PLANNED PARENTHOOD AND WOMEN MORE!!!!! #GOPDebate "
     print(predict(perdict_text2))
 
 if __name__ == '__main__':
 
-    trian()
-    # load()
     test()
 
