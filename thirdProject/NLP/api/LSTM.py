@@ -60,8 +60,8 @@ print(model.summary())
 
 # ## train mode
 
-batch_size = 32
-model.fit(X_train, Y_train, epochs = 10, batch_size=batch_size, verbose = 2)
+batch_size = 512
+model.fit(X_train, Y_train, epochs = 1, batch_size=batch_size, verbose = 2)
 
 validation_size = 1000
 
@@ -88,12 +88,13 @@ def get_result(sentiment):
 
 
 def predictLSTM(text):
+    print(text)
     twt = [text]
     #vectorizing the tweet by the pre-fitted tokenizer instance
     twt = tokenizer.texts_to_sequences(twt)
     #padding the tweet to have exactly the same shape as `embedding_2` input
     twt = pad_sequences(twt, maxlen=28, dtype='int32', value=0)
-
+    print(model.summary())
     sentiment = model.predict(twt,batch_size=1,verbose = 2)[0]
     result = get_result(sentiment)
 
@@ -123,13 +124,13 @@ def predictLSTM(text):
 
 def test():
     perdict_text = "I'll tell you the one good thing about #GOPDebates: candidates are tripping over themselves to outdo each other in sexism"
-    print(predict(perdict_text))
+    print(predictLSTM(perdict_text))
 
     perdict_text2 = "Meetings: Because none of us is as dumb as all of us. "
-    print(predict(perdict_text2))
+    print(predictLSTM(perdict_text2))
 
     perdict_text2 = "No *I* hate Planned Parenthood and women more! NO I HATE PLANNED PARENTHOOD AND WOMEN MORE!!!!! #GOPDebate "
-    print(predict(perdict_text2))
+    print(predictLSTM(perdict_text2))
 
 if __name__ == '__main__':
 
