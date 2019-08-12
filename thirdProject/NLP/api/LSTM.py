@@ -18,7 +18,8 @@ from keras.utils.np_utils import to_categorical
 import re
 from keras.models import load_model
 
-#=======init================================================
+
+#=======ltsm model init================================================
 max_fatures = 2000
 
 data = pd.read_csv('../Sentiment.csv')
@@ -60,13 +61,8 @@ print(model.summary())
 
 # ## train mode
 
-<<<<<<< HEAD
 batch_size = 512
 model.fit(X_train, Y_train, epochs = 1, batch_size=batch_size, verbose = 2)
-=======
-batch_size = 256
-model.fit(X_train, Y_train, epochs = 10, batch_size=batch_size, verbose = 2)
->>>>>>> 229192aa7619ffde8cc1155dd9d5c103c54f54ef
 
 validation_size = 1000
 
@@ -78,6 +74,8 @@ Y_test = Y_test[:-validation_size]
 score,acc = model.evaluate(X_test, Y_test, verbose = 2, batch_size = batch_size)
 print("score: %.2f" % (score))
 print("acc: %.2f" % (acc))
+
+
 ''''''
 # ## perdict
 def get_result(sentiment):
@@ -85,12 +83,6 @@ def get_result(sentiment):
         print("negative")
     elif (np.argmax(sentiment) == 1):
         print("positive")
-    
-    # if y_pred[0] >= 0.5: 
-    #     return 'Positive'
-    # else :
-    #     return 'Negative'
-
 
 def predictLSTM(text):
     print(text)
@@ -100,30 +92,9 @@ def predictLSTM(text):
     #padding the tweet to have exactly the same shape as `embedding_2` input
     twt = pad_sequences(twt, maxlen=28, dtype='int32', value=0)
     print(model.summary())
+    K.clear_session() 
     sentiment = model.predict(twt,batch_size=1,verbose = 2)[0]
     result = get_result(sentiment)
-
-
-
-    predict_text = text.lower()
-    predict_text = re.sub('[^a-zA-z0-9\s]','',predict_text)
-
-    predict_data = [predict_text]
-
-    # max_fatures = 2000
-    # tokenizer = Tokenizer(num_words=max_fatures, split=' ')
-    # tokenizer.fit_on_texts(predict_data)
-    # PX = tokenizer.texts_to_sequences(predict_data)
-    # PX = pad_sequences(PX, maxlen=28)
-    
-    
-    # if model == None:
-        # print("load_model!!!")
-    # print(model.summary())
-
-    # y_pred = model.predict(PX, batch_size = 1)
-    # print(y_pred)
-    # result = get_result(y_pred[0])
     return result
 
 
