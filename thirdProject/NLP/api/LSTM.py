@@ -18,43 +18,34 @@ from keras.utils.np_utils import to_categorical
 import re
 from keras.models import load_model
 
+#=======init================================================
 max_fatures = 2000
 
-def load_data():
-    data = pd.read_csv('../Sentiment.csv')
-    # Keeping only the neccessary columns
-    data = data[['text','sentiment']]
-    data = data[data.sentiment != "Neutral"]
-    data['text'] = data['text'].apply(lambda x: x.lower())
-    data['text'] = data['text'].apply((lambda x: re.sub('[^a-zA-z0-9\s]','',x)))
+data = pd.read_csv('../Sentiment.csv')
+# Keeping only the neccessary columns
+data = data[['text','sentiment']]
+data = data[data.sentiment != "Neutral"]
+data['text'] = data['text'].apply(lambda x: x.lower())
+data['text'] = data['text'].apply((lambda x: re.sub('[^a-zA-z0-9\s]','',x)))
 
-    print(data[ data['sentiment'] == 'Positive'].size)
-    print(data[ data['sentiment'] == 'Negative'].size)
-
-    for idx,row in data.iterrows():
-        row[0] = row[0].replace('rt',' ')
-        
+for idx,row in data.iterrows():
+    row[0] = row[0].replace('rt',' ')
     
-    tokenizer = Tokenizer(num_words=max_fatures, split=' ')
-    tokenizer.fit_on_texts(data['text'].values)
-    X = tokenizer.texts_to_sequences(data['text'].values)
-    X = pad_sequences(X)
 
-    Y = pd.get_dummies(data['sentiment']).values
-    X_train, X_test, Y_train, Y_test = train_test_split(X,Y, test_size = 0.3, random_state = 42)
-    print(X_train.shape,Y_train.shape)
-    print(X_test.shape,Y_test.shape)
-    return X_train, X_test, Y_train, Y_test, X, Y
+tokenizer = Tokenizer(num_words=max_fatures, split=' ')
+tokenizer.fit_on_texts(data['text'].values)
+X = tokenizer.texts_to_sequences(data['text'].values)
+X = pad_sequences(X)
 
-#=======init================================================
+Y = pd.get_dummies(data['sentiment']).values
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y, test_size = 0.3, random_state = 42)
+print(X_train.shape,Y_train.shape)
+print(X_test.shape,Y_test.shape)
 
-# load_data
-X_train, X_test, Y_train, Y_test, X, Y = load_data()
 
 # ## build model
 embed_dim = 128
 lstm_out = 196
-
 
 model = Sequential()
 model.add(Embedding(max_fatures, embed_dim, input_length = X.shape[1]))
@@ -83,33 +74,49 @@ print("score: %.2f" % (score))
 print("acc: %.2f" % (acc))
 
 # ## perdict
-def get_result(y_pred):
-    if y_pred[0] >= 0.5: 
-        return 'Positive'
-    else :
-        return 'Negative'
+def get_result(sentiment):
+    if(np.argmax(sentiment) == 0):
+        print("negative")
+    elif (np.argmax(sentiment) == 1):
+        print("positive")
+    
+    # if y_pred[0] >= 0.5: 
+    #     return 'Positive'
+    # else :
+    #     return 'Negative'
 
 
 def predict(text):
+    twt = [text]
+    #vectorizing the tweet by the pre-fitted tokenizer instance
+    twt = tokenizer.texts_to_sequences(twt)
+    #padding the tweet to have exactly the same shape as `embedding_2` input
+    twt = pad_sequences(twt, maxlen=28, dtype='int32', value=0)
+
+    sentiment = model.predict(twt,batch_size=1,verbose = 2)[0]
+    result = get_result(sentiment)
+
+
+
     predict_text = text.lower()
     predict_text = re.sub('[^a-zA-z0-9\s]','',predict_text)
 
     predict_data = [predict_text]
 
-    max_fatures = 2000
-    tokenizer = Tokenizer(num_words=max_fatures, split=' ')
-    tokenizer.fit_on_texts(predict_data)
-    PX = tokenizer.texts_to_sequences(predict_data)
-    PX = pad_sequences(PX, maxlen=28)
+    # max_fatures = 2000
+    # tokenizer = Tokenizer(num_words=max_fatures, split=' ')
+    # tokenizer.fit_on_texts(predict_data)
+    # PX = tokenizer.texts_to_sequences(predict_data)
+    # PX = pad_sequences(PX, maxlen=28)
     
     
-    if model == None:
-        print("load_model!!!")
+    # if model == None:
+        # print("load_model!!!")
     # print(model.summary())
 
-    y_pred = model.predict(PX, batch_size = 1)
-    print(y_pred)
-    result = get_result(y_pred[0])
+    # y_pred = model.predict(PX, batch_size = 1)
+    # print(y_pred)
+    # result = get_result(y_pred[0])
     return result
 
 
@@ -117,7 +124,7 @@ def test():
     perdict_text = "I'll tell you the one good thing about #GOPDebates: candidates are tripping over themselves to outdo each other in sexism"
     print(predict(perdict_text))
 
-    perdict_text2 = "Really enjoyed everything @marcorubio had to say last night. #Rubio2016 #GOPDebate #AmericaOnPoint "
+    perdict_text2 = "Meetings: Because none of us is as dumb as all of us. "
     print(predict(perdict_text2))
 
     perdict_text2 = "No *I* hate Planned Parenthood and women more! NO I HATE PLANNED PARENTHOOD AND WOMEN MORE!!!!! #GOPDebate "
