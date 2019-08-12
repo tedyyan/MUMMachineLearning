@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>send.html</title>
+	
+    <meta http-equiv="Access-Control-Allow-Origin" content="*" />
+    
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+
+  </head>
+  
+  <body>
+	  <p><h1>Tweeter sentiment analysis</h1></p>
+
+	  <p><h1>Input your text:</h1> </p>
+	  <form>
+		    
+			<textarea name="yourtext" id="yourtext"></textarea>
+			<button type="button" onclick="analysistext()">Submit</button>
+		</form>
+		<p><h1>Test data from tweeter API</h1> </p>
+    <form>
+    	<label>keyword:</label>
+    	<input type="text" name="keyword">
+    	
+		<label>count:</label>
+		<input type="text" name="count">
+		
+		<label>result_type:</label>
+		<select name="result_type">
+			<option value=""></option>
+			<option value="mixed">mixed</option>
+			<option value="popular">popular</option>
+			<option value="recent">recent</option>
+		</select>
+		<button type="button" onclick="send()">Submit</button>
+    </form>
+	<p><h1><a href="/templatemap">Show me the Positive map</a></h1></p>
+	<p><h1><a href="/templatemapneg">Show me the Negative map</a></h1></p>
+	
+	<script type="text/javascript">
+		function analysistext() {
+
+	        var keyword_ele = document.getElementsByName("yourtext")[0];
+	        var yourtext = keyword_ele.value;
+
+	        
+	
+			var server = "http://localhost:5000/analysistext?yourtext=" + yourtext;
+	        var xmlHttp = new XMLHttpRequest();
+	        xmlHttp.open("GET", server, true);
+	        xmlHttp.send(null);
+	
+	        xmlHttp.onreadystatechange = function () {
+	            if (xmlHttp.readyState ==4 && xmlHttp.status ==200){
+	                alert(xmlHttp.responseText);
+	                //alert(typeof xmlHttp.responseText)	
+	            }
+	        }	
+	 	}
+	</script>
+
+	<script type="text/javascript">
+		function send() {
+
+	        var keyword_ele = document.getElementsByName("keyword")[0];
+	        var keyword = keyword_ele.value;
+
+	        var count_ele = document.getElementsByName("count")[0];
+	        var count = count_ele.value;
+	        
+	        var result_type_ele = document.getElementsByName("result_type")[0];
+	        var result_type = result_type_ele.value;
+	
+			var server = "http://localhost:5000/tweetLearning?keyword=" + keyword + "&count=" + count + "&result_type=" + result_type;
+	        var xmlHttp = new XMLHttpRequest();
+	        xmlHttp.open("GET", server, true);
+	        xmlHttp.send(null);
+	
+	        xmlHttp.onreadystatechange = function () {
+	            if (xmlHttp.readyState ==4 && xmlHttp.status ==200){
+	                alert(xmlHttp.responseText);
+	                //alert(typeof xmlHttp.responseText)	
+	            }
+	        }	
+	 	}
+	</script>
+  </body>
+</html>
