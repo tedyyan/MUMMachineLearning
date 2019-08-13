@@ -91,12 +91,12 @@ def predictLSTM(text):
     twt = tokenizer.texts_to_sequences(twt)
     #padding the tweet to have exactly the same shape as `embedding_2` input
     twt = pad_sequences(twt, maxlen=28, dtype='int32', value=0)
-    print(model.summary())
-    K.clear_session() 
-    sentiment = model.predict(twt,batch_size=1,verbose = 2)[0]
+    #print(model.summary())
+    
+    sentiment = model.predict(twt,batch_size=10,verbose = 2)[0]
     result = get_result(sentiment)
     return result
-
+predictLSTM("good way")
 
 def test():
     perdict_text = "I'll tell you the one good thing about #GOPDebates: candidates are tripping over themselves to outdo each other in sexism"
