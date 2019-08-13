@@ -4,7 +4,13 @@
     <title>send.html</title>
 	
     <meta http-equiv="Access-Control-Allow-Origin" content="*" />
-    
+    <head>
+	<style>
+	table, th, td {
+		border: 1px solid black
+		}
+	</style>
+	</head>
     <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
 
   </head>
@@ -41,6 +47,37 @@
     </form>
 	<p><h1><a href="/templatemap">Show me the Positive map</a></h1></p>
 	<p><h1><a href="/templatemapneg">Show me the Negative map</a></h1></p>
+	<p><h1><a href="/templatemapneg">result map</a></h1></p>
+	<table >
+			<tr>
+					<td>
+					Positive:
+					</td>	
+				</tr>
+			{%	for p in pos %}
+			<tr>
+				<td>
+				{{ p }} &nbsp;&nbsp;
+				</td>	
+			</tr>		
+			{%	endfor %}
+		
+			<tr>
+					<td>
+					Negative:
+					</td>	
+				</tr>	
+			{%	for p in neg %}
+			<tr>
+				<td>
+				{{ p }} &nbsp;&nbsp;
+				</td>	
+			</tr>		
+			{%	endfor %}
+		
+	</table>
+	
+	
 	
 	<script type="text/javascript">
 		function analysistext() {

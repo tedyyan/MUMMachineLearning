@@ -81,8 +81,11 @@ print("acc: %.2f" % (acc))
 def get_result(sentiment):
     if(np.argmax(sentiment) == 0):
         print("negative")
+        return "negative"
     elif (np.argmax(sentiment) == 1):
         print("positive")
+        return "positive"
+    
 
 def predictLSTM(text):
     print(text)

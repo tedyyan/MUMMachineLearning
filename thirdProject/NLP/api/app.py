@@ -108,9 +108,7 @@ def drawMapNeg(tweets):
     gmap.draw("templates/python_negheatmap.html")
 
 def analysisSentiment(text):
-    print(text)
-    
-    if predictLSTM(text) == 'Positive':  #len(text) > 80:
+    if predictLSTM(text) == 'positive':  #len(text) > 80:
         return "positive"
     else:
         return "negative"
@@ -210,7 +208,30 @@ def index():
 
 @app.route('/send')
 def send():
-    return render_template('send.html')
+    data = pd.read_csv('../Sentiment.csv')
+    # Keeping only the neccessary columns
+    data = data[['text','sentiment']]
+    nega = data[ data['sentiment'] == 'Negative']["text"]
+    pos = data[ data['sentiment'] == 'Positive']["text"]
+    negapredict = []
+    posipredict = []
+    n = []
+    p = []
+    index = 0
+    for _, row in nega.T.iteritems():
+        
+        n.append(str(index)+":     "+str(row)+" ------------------------  "+ analysisSentiment( row ) ) #+"  --  "+ analysisSentimentGRU( row )
+        index += 1
+        if index > 10:
+            break
+    index = 0
+    for _, row in pos.T.iteritems():
+        p.append(str(index)+":     "+str(row) +" ------------------------  " + analysisSentiment( row ) ) #+"  --  "+  analysisSentimentGRU( row )
+        index += 1
+        if index > 10:
+            break
+
+    return render_template('send.html',neg = n,pos = p, negapredict = negapredict,posipredict = posipredict)
 
 @app.route('/templatemap', methods=['GET'])
 def templatemap():
