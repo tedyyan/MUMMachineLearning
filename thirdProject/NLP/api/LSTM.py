@@ -17,7 +17,7 @@ from sklearn.model_selection import train_test_split
 from keras.utils.np_utils import to_categorical
 import re
 from keras.models import load_model
-
+from keras.backend import clear_session
 
 #=======ltsm model init================================================
 max_fatures = 2000
@@ -62,7 +62,7 @@ print(model.summary())
 # ## train mode
 
 batch_size = 512
-model.fit(X_train, Y_train, epochs = 1, batch_size=batch_size, verbose = 2)
+model.fit(X_train, Y_train, epochs = 12, batch_size=batch_size, verbose = 2)
 
 validation_size = 1000
 
@@ -95,7 +95,7 @@ def predictLSTM(text):
     #padding the tweet to have exactly the same shape as `embedding_2` input
     twt = pad_sequences(twt, maxlen=28, dtype='int32', value=0)
     #print(model.summary())
-    
+    #clear_session()
     sentiment = model.predict(twt,batch_size=10,verbose = 2)[0]
     result = get_result(sentiment)
     return result

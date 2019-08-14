@@ -21,7 +21,8 @@
 	  <p><h1>Input your text:</h1> </p>
 	  <form>
 		    
-			<textarea name="yourtext" id="yourtext"></textarea>
+			<textarea rows="4" cols="50" name="yourtext" id="yourtext"></textarea>
+			<br>
 			<button type="button" onclick="analysistext()">Submit</button>
 			<select name="ml">
 				<option value="LSTM">LSTM</option>
@@ -88,10 +89,13 @@
 	        var ml = ml_ele.value;
 	        
 	
-			var server = "http://localhost:5000/analysistext?yourtext=" + yourtext + "&ml=" + ml;
+			var server = "http://localhost:5000/analysistext";
 	        var xmlHttp = new XMLHttpRequest();
-	        xmlHttp.open("GET", server, true);
-	        xmlHttp.send(null);
+	        xmlHttp.open("POST", server, true);
+			xmlHttp.setRequestHeader("Content-Type", "application/json");
+            data = JSON.stringify({"yourtext": yourtext,"ml":ml});
+			//datas = {"yourtext":yourtext,"ml":ml}
+	        xmlHttp.send(data)
 	
 	        xmlHttp.onreadystatechange = function () {
 	            if (xmlHttp.readyState ==4 && xmlHttp.status ==200){

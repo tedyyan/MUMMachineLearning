@@ -131,13 +131,19 @@ def predict():
     
     return jsonify({"result":analysisSentiment(json_["text"])})
 '''
-@app.route('/analysistext', methods=['GET'])
+@app.route('/analysistext', methods=['POST'])
 def analysistext():
-    #json_ = request.json
-    print(request.args.to_dict())
-    gets = request.args.to_dict()
+    json_ = request.json
+    print(json_)
+    #str1 = str(request.args)
+    yourtext = json_["yourtext"]
+    ml = json_["ml"]
+    print("yourtext "+yourtext+" ml "+ml)
+    '''
+    gets = request.args
     yourtext = gets.get("yourtext")
     ml = gets.get("ml")
+    '''
     if ml == "LSTM":
         result = analysisSentiment(yourtext)
     else:
@@ -193,10 +199,11 @@ def tweetLearning():
     
     tweets = pd.DataFrame(data=tweetsarr)
     
-
-    drawMapPos(tweetsarr)
-    drawMapNeg(tweetsarr)
-    
+    try:
+        drawMapPos(tweetsarr)
+        drawMapNeg(tweetsarr)
+    except:
+        pass
 
     print("count",count,"Positive:",positivecnt,"Negtive:",negtivecnt)
     return jsonify({"count":count,"Positive:":positivecnt,"Negtive:":negtivecnt})
@@ -213,17 +220,15 @@ def send():
     data = data[['text','sentiment']]
     nega = data[ data['sentiment'] == 'Negative']["text"]
     pos = data[ data['sentiment'] == 'Positive']["text"]
-    negapredict = []
-    posipredict = []
     n = []
     p = []
     index = 0
-    for _, row in nega.T.iteritems():
-        
+    for _, row in nega.T.iteritems():        
         n.append(str(index)+":     "+str(row)+" ------------------------  "+ analysisSentiment( row ) ) #+"  --  "+ analysisSentimentGRU( row )
         index += 1
         if index > 10:
             break
+
     index = 0
     for _, row in pos.T.iteritems():
         p.append(str(index)+":     "+str(row) +" ------------------------  " + analysisSentiment( row ) ) #+"  --  "+  analysisSentimentGRU( row )
@@ -231,7 +236,7 @@ def send():
         if index > 10:
             break
 
-    return render_template('send.html',neg = n,pos = p, negapredict = negapredict,posipredict = posipredict)
+    return render_template('send.html',neg = n,pos = p)
 
 @app.route('/templatemap', methods=['GET'])
 def templatemap():
