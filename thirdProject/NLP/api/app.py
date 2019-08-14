@@ -13,7 +13,6 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from sklearn import model_selection
 from twython import Twython
-# from LSTM import predictLSTM
 import json
 
 from geopy.geocoders import Nominatim
@@ -29,9 +28,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Embedding, LSTM, SpatialDropout1D
 from sklearn.model_selection import train_test_split
 from keras.utils.np_utils import to_categorical
-from GRUapi import load_data, twt_GRU
-from LSTM import predictLSTM
-import re
+from LSTM import predictLSTM, train_LSTM
 
 
 app = Flask(__name__)
@@ -114,12 +111,13 @@ def analysisSentiment(text):
         return "negative"
 
 def analysisSentimentGRU(text):
-    print(text)
+    # print(text)
     
-    if twt_GRU(text) == 'positive':  #len(text) > 80:
-        return "positive"
-    else:
-        return "negative"
+    # if twt_GRU(text) == 'positive':  #len(text) > 80:
+    #     return "positive"
+    # else:
+    #     return "negative"
+    return "negative"
 '''
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -246,12 +244,19 @@ def templatemap():
 def templatemapneg():
     return render_template('python_negheatmap.html')
 
+@app.route('/train_LSTM', methods=['GET'])
+def trainLSTMapi():
+    train_LSTM()
+    return ""
+
 if __name__ == '__main__':
     try:
         port = int(sys.argv[1])
     except Exception as e:
         port = 5000
-    load_data()
+    #load_data()
 
+    # train_LSTM()
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
