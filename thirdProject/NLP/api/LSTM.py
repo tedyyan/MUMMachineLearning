@@ -62,7 +62,9 @@ print(model.summary())
 # ## train mode
 
 batch_size = 512
+
 model.fit(X_train, Y_train, epochs = 12, batch_size=batch_size, verbose = 2)
+
 
 validation_size = 1000
 
@@ -99,7 +101,8 @@ def predictLSTM(text):
     sentiment = model.predict(twt,batch_size=10,verbose = 2)[0]
     result = get_result(sentiment)
     return result
-predictLSTM("good way")
+
+predictLSTM("I'll tell you the one good thing about #GOPDebates: candidates are tripping over themselves to outdo each other in sexism")
 
 def test():
     perdict_text = "I'll tell you the one good thing about #GOPDebates: candidates are tripping over themselves to outdo each other in sexism"
